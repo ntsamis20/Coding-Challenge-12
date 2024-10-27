@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Shape Drawing</title>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+            cursor: crosshair;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Canvas Shape Drawing</h2>
+
+<div class="controls">
+    <label>
+        <input type="radio" name="tool" value="line" checked>
+        Line
+    </label>
+    <label>
+        <input type="radio" name="tool" value="rectangle">
+        Rectangle
+    </label>
+    <label>
+        <input type="radio" name="tool" value="circle">
+        Circle
+    </label>
+    <button onclick="clearCanvas()">Clear Canvas</button>
+</div>
+
+<canvas id="canvas" width="500" height="400"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let startX = 0;
+    let startY = 0;
+    let tool = 'line';
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', drawShape);
+    canvas.addEventListener('mouseup', finishDrawing);
+    canvas.addEventListener('mouseout', finishDrawing);
+
+    document.querySelectorAll('input[name="tool"]').forEach(input => {
+        input.addEventListener('change', (e) => {
+            tool = e.target.value;
+        });
+    });
+
+    function startDrawing(event) {
+        isDrawing = true;
+        [startX, startY] = getMousePos(event);
+        ctx.beginPath();
+    }
+
+    function drawShape(event) {
+        if (!isDrawing) return;
+
+        const [currentX, currentY] = getMousePos(event);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = 'black'; 
+        ctx.lineWidth = 2;
+
+        if (tool === 'line') {
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+        } else if (tool === 'Square') {
+            const width = currentX - startX;
+            const height = currentY - startY;
+            ctx.rect(startX, startY, width, height);
+            ctx.stroke();
+        } else if (tool === 'Circle') {
+            const radius = Math.sqrt((currentX - startX) ** 2 + (currentY - startY) ** 2);
+            ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
+
+    function finishDrawing() {
+        if (!isDrawing) return;
+        isDrawing = false;
+        ctx.closePath();
+    }
+
+    function getMousePos(event) {
+        const rect = canvas.getBoundingClientRect();
+        return [
+            event.clientX - rect.left,
+            event.clientY - rect.top
+        ];
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+</script>
+
+</body>
+</html>
